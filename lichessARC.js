@@ -120,6 +120,7 @@ function initTable(container) {
 //Load previously clicked elements if page is refreshed/come back to
 function loadPrevPressed() {
 
+  if(timeControl) {
     document.getElementById("parentTable").childNodes.forEach(function(element) {
         element.childNodes.forEach(function(children) {
 
@@ -131,6 +132,7 @@ function loadPrevPressed() {
 
         });
     });
+  }
 }
 
 //Initizalize event listeners and class for table elements
