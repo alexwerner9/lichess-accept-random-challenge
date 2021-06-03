@@ -22,7 +22,7 @@ function acceptChallenge() {
   var challenges = document.getElementsByClassName("challenges");
   var challenge = challenges[Math.floor(Math.random() * challenges.length)]
 
-  if(acceptAll) challenge.getElementsByClassName("accept")[0].click(); else {
+  if(acceptAll || timeControl.length == 0) challenge.getElementsByClassName("accept")[0].click(); else {
 
     for(i = 0; i < timeControl.length; i++) {
 
