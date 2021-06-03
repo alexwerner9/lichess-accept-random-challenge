@@ -6,6 +6,18 @@ var timeControl = [];
 var shiftPressed = false;
 var acceptAll = true;
 
+//Thanks stackoverflow user kennebec
+Array.prototype.remove = function() {
+    var what, a = arguments, L = a.length, ax;
+    while (L && this.length) {
+        what = a[--L];
+        while ((ax = this.indexOf(what)) !== -1) {
+            this.splice(ax, 1);
+        }
+    }
+    return this;
+};
+
 function acceptChallenge() {
   var challenges = document.getElementsByClassName("challenges");
   var challenge = challenges[Math.floor(Math.random() * challenges.length)]
@@ -95,6 +107,7 @@ function initTable(container) {
   thirdRow.appendChild(tenfive);
   var custom = document.createElement("td");
   custom.innerText = "All";
+  custom.id = "allId";
   thirdRow.appendChild(custom);
 
   //Add rows to table
@@ -120,19 +133,20 @@ function initTable(container) {
 //Load previously clicked elements if page is refreshed/come back to
 function loadPrevPressed() {
 
-  if(timeControl) {
-    document.getElementById("parentTable").childNodes.forEach(function(element) {
-        element.childNodes.forEach(function(children) {
+    if(timeControl) {
 
-           for(i = 0; i < timeControl.length; i++) {
-               if(timeControl[i].includes(children.innerText.replace(/\s+/g, ''))) {
-                   children.className = "clickedElement";
-               }
-           }
+        document.getElementById("parentTable").childNodes.forEach(function(element) {
+            element.childNodes.forEach(function(children) {
 
+            for(i = 0; i < timeControl.length; i++) {
+                if(timeControl[i].includes(children.innerText.replace(/\s+/g, ''))) {
+                    children.className = "clickedElement";
+                }
+            }
+
+            });
         });
-    });
-  }
+    }
 }
 
 //Initizalize event listeners and class for table elements
@@ -143,22 +157,26 @@ function initTableData() {
             children.className = "unclickedElement";
             
             children.addEventListener('click', function() {
-                if(children.innerText == "All") {
+                if(children.innerText == "All" && children.className == "unclickedElement") {
                     acceptAll = true;
-                } else acceptAll = false;
-
-                if(shiftPressed) {
-                    timeControl.push(children.innerText.replace(/\s+/g, ''));
-                } else { 
                     resetTable();
-                    timeControl = [];
+                } else {
+                    acceptAll = false;
+                    document.getElementById("allId").className = "unclickedElement";
+                    timeControl.remove("All");
+                }
+
+                //Toggles buttons when clicked
+                if(children.className == "clickedElement") {
+                    children.className = "unclickedElement";
+                    timeControl.remove(children.innerText.replace(/\s+/g, ''));
+                } else if(children.className == "unclickedElement") {
+                    children.className = "clickedElement";
                     timeControl.push(children.innerText.replace(/\s+/g, ''));
                 }
 
                 //Pushes the time control array to Chrome storage API to be loaded later
                 chrome.storage.sync.set({"clickedElements": timeControl});
-
-                children.className = "clickedElement";
 
             });
         });
@@ -187,13 +205,16 @@ function addListener() {
     });
 }
 
-//Clears table formatting for elements not selected
+//Clears table if "All" is selected
 function resetTable() {
 
     document.getElementById("parentTable").childNodes.forEach(function(element) {
         element.childNodes.forEach(function(children) {
 
-            children.className = "unclickedElement";
+            if(children.innerText == "All") {} else {
+                timeControl.remove(children.innerText.replace(/\s+/g, ''));
+                children.className = "unclickedElement";
+            }
 
         });
     });
