@@ -4,7 +4,7 @@ var CHALLENGE_MENU_TOGGLE_ID = 'challenge-toggle';
 var timeControl = [];
 
 var shiftPressed = false;
-var acceptAll = true;
+var acceptAll = false;
 
 //Thanks stackoverflow user kennebec
 Array.prototype.remove = function() {
@@ -22,12 +22,17 @@ function acceptChallenge() {
   var challenges = document.getElementsByClassName("challenges");
   var challenge = challenges[Math.floor(Math.random() * challenges.length)]
 
-  if(acceptAll || timeControl.length == 0) challenge.getElementsByClassName("accept")[0].click(); else {
+  console.log(timeControl);
+
+  if(acceptAll || timeControl.length == 0) {
+       challenge.getElementsByClassName("accept")[0].click();
+   } else {
 
     for(i = 0; i < timeControl.length; i++) {
 
         if(challenge.getElementsByClassName("desc")[0].innerText.includes(timeControl[i])) {
 
+            console.log("here");
             challenge.getElementsByClassName("accept")[0].click();
 
         } else { acceptChallenge; }
@@ -163,16 +168,16 @@ function initTableData() {
                 } else {
                     acceptAll = false;
                     document.getElementById("allId").className = "unclickedElement";
-                    timeControl.remove("All");
+                    if(timeControl) timeControl.remove("All");
                 }
 
                 //Toggles buttons when clicked
                 if(children.className == "clickedElement") {
                     children.className = "unclickedElement";
-                    timeControl.remove(children.innerText.replace(/\s+/g, ''));
+                    if(timeControl) timeControl.remove(children.innerText.replace(/\s+/g, ''));
                 } else if(children.className == "unclickedElement") {
                     children.className = "clickedElement";
-                    timeControl.push(children.innerText.replace(/\s+/g, ''));
+                    if(timeControl) timeControl.push(children.innerText.replace(/\s+/g, ''));
                 }
 
                 //Pushes the time control array to Chrome storage API to be loaded later
@@ -212,7 +217,7 @@ function resetTable() {
         element.childNodes.forEach(function(children) {
 
             if(children.innerText == "All") {} else {
-                timeControl.remove(children.innerText.replace(/\s+/g, ''));
+                if(timeControl) timeControl.remove(children.innerText.replace(/\s+/g, ''));
                 children.className = "unclickedElement";
             }
 
@@ -240,8 +245,13 @@ function loadContainer() {
 
     //Gets the previously clicked time controls from Chrome storage API
     chrome.storage.sync.get("clickedElements", function(result) {
+        for(var i = 0; i < result.clickedElements.length; i++) {
+            if(result.clickedElements[i] == "All") acceptAll = true;
+        }
         timeControl = result.clickedElements;
     });
+
+
 
   e = document.getElementById(CHALLENGE_MENU_TOGGLE_ID);
   if (!e) {
